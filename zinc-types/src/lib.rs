@@ -104,3 +104,6 @@ pub use self::utils::address_from_slice;
 pub use self::utils::num_compat_backward;
 pub use self::utils::num_compat_forward;
 pub use self::utils::private_key_from_slice;
+
+pub use self::request::swap::Query as SwapRequestQuery;
+pub use self::response::swap::Body as SwapResponseBody;

@@ -14,6 +14,10 @@ pub use self::controller::configure;
 pub use self::database::client::Client as DatabaseClient;
 pub use self::error::Error;
 pub use self::shared_data::SharedData;
+pub use self::database::swap_database::SwapDatabase;
+
+#[macro_use]
+extern crate lazy_static;
 
 ///
 /// The Actix response type anti-boilerplate wrapper.

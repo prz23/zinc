@@ -13,6 +13,8 @@ use crate::database::client::Client as DatabaseClient;
 
 use self::locked_contract::LockedContract;
 
+use crate::database::swap_database::SwapDatabase;
+
 ///
 /// The Zandbox server daemon shared application data.
 ///
@@ -21,6 +23,9 @@ pub struct SharedData {
     pub postgresql: DatabaseClient,
     /// The zkSync network identifier.
     pub network: zksync::Network,
+
+    pub swapdata: SwapDatabase,
+
     /// The contracts waiting to be unlocked by `initialize` endpoint.
     pub locked_contracts: HashMap<zksync_types::Address, LockedContract>,
 }
@@ -31,10 +36,11 @@ impl SharedData {
     ///
     /// A shortcut constructor.
     ///
-    pub fn new(postgresql: DatabaseClient, network: zksync::Network) -> Self {
+    pub fn new(postgresql: DatabaseClient, network: zksync::Network, swapdata:SwapDatabase ) -> Self {
         Self {
             postgresql,
             network,
+            swapdata,
             locked_contracts: HashMap::with_capacity(Self::LOCKED_CONTRACTS_INITIAL_CAPACITY),
         }
     }

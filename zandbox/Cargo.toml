@@ -48,3 +48,13 @@ zinc-math = { path = "../zinc-math" }
 zinc-project = { path = "../zinc-project" }
 zinc-types = { path = "../zinc-types" }
 zinc-vm = { path = "../zinc-vm" }
+
+chrono = "*"
+lazy_static = "*"
+num-traits = "*"
+
+[dependencies.mongodb]
+version = "1.2.1"
+default-features = false
+features = ["async-std-runtime","sync"]
+

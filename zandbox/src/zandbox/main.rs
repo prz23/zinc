@@ -30,7 +30,9 @@ async fn main() -> anyhow::Result<()> {
     log::info!("Initializing the PostgreSQL client");
     let postgresql = zandbox::DatabaseClient::new(args.postgresql_uri.as_str()).await?;
 
-    let data = zandbox::SharedData::new(postgresql, network).wrap();
+    let swapdata = zandbox::SwapDatabase::new("mongodb://localhost:27017").unwrap();
+
+    let data = zandbox::SharedData::new(postgresql, network, swapdata).wrap();
 
     HttpServer::new(move || {
         App::new()

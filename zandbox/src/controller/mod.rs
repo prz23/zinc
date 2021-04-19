@@ -5,7 +5,7 @@
 pub mod contract;
 pub mod head;
 pub mod project;
-
+pub mod swap;
 use actix_web::web;
 
 ///
@@ -61,7 +61,15 @@ pub fn configure(config: &mut web::ServiceConfig) {
                                 .route(web::head().to(head::handle))
                                 .route(web::get().to(project::source::handle)),
                         ),
-                ),
+                ).service(
+                web::scope("/swap")
+                    .service(
+                        web::resource("/get_data")
+                            .route(web::head().to(head::handle))
+                            .route(web::get().to(swap::handle)),
+                    ),
+            ),
+
         ),
     );
 }

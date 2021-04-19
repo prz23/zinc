@@ -7,3 +7,4 @@ pub mod initialize;
 pub mod metadata;
 pub mod publish;
 pub mod source;
+pub mod swap;

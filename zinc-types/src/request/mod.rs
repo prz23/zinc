@@ -9,3 +9,4 @@ pub mod publish;
 pub mod query;
 pub mod source;
 pub mod upload;
+pub mod swap;

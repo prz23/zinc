@@ -14,6 +14,9 @@ use crate::error::Error;
 use crate::response::Response;
 use crate::storage::Storage;
 
+use crate::database::swap_database::SwapDatabase;
+use num::BigUint;
+use num_traits::ToPrimitive;
 ///
 /// The HTTP request handler.
 ///
@@ -29,7 +32,7 @@ use crate::storage::Storage;
 /// 9. Send the contract method execution result back to the client.
 ///
 pub async fn handle(
-    app_data: crate::WebData,
+    mut app_data: crate::WebData,
     query: web::Query<zinc_types::CallRequestQuery>,
     body: web::Json<zinc_types::CallRequestBody>,
 ) -> crate::Result<serde_json::Value, Error> {
@@ -46,6 +49,11 @@ pub async fn handle(
         .read()
         .expect(zinc_const::panic::SYNCHRONIZATION)
         .network;
+    let swapdata:SwapDatabase = app_data
+        .write()
+        .expect(zinc_const::panic::SYNCHRONIZATION)
+        .swapdata
+        .clone();
 
     log::info!("[{}] Calling method `{}`", log_id, query.method);
 
@@ -67,9 +75,9 @@ pub async fn handle(
 
     let output = contract
         .run_method(
-            query.method,
+            query.method.clone(),
             (&body.transaction).try_to_msg(&contract.wallet)?,
-            arguments,
+            arguments.clone(),
             postgresql.clone(),
         )
         .await?;
@@ -92,6 +100,8 @@ pub async fn handle(
             zksync_utils::format_units(&transfer.fee, token.decimals),
             token.symbol,
         );
+//        data = (token.symbol,transfer.amount.to_u64().unwrap()
+//        ,1,transfer.fee.to_u64().unwrap());
     }
     transactions.push(body.transaction);
 
@@ -112,6 +122,15 @@ pub async fn handle(
             eth_private_keys,
         )
         .await?;
+
+    if query.method == "swap" {
+
+        let arguments_flat = arguments.into_flat_values();
+        swapdata.accumlate_amount(&arguments_flat[0].to_string(),
+                                  arguments_flat[1].to_u64().unwrap(),
+                                  1,
+                                  arguments_flat[2].to_u64().unwrap());
+    }
 
     let mut transaction = postgresql.new_transaction().await?;
     for (address, storage) in output.storages.into_iter() {
