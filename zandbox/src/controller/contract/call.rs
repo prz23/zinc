@@ -124,12 +124,15 @@ pub async fn handle(
         .await?;
 
     if query.method == "swap" {
-
+        let div10_9 = |x:&BigInt| -> u64 {
+            let tmp:BigInt = x / 1000000000;
+            tmp.to_u64().unwrap()
+        };
         let arguments_flat = arguments.into_flat_values();
         swapdata.accumlate_amount(&arguments_flat[0].to_string(),
-                                  arguments_flat[1].to_u64().unwrap(),
+                                  div10_9(&arguments_flat[1]),
                                   1,
-                                  arguments_flat[2].to_u64().unwrap());
+                                  div10_9(&arguments_flat[2]));
     }
 
     let mut transaction = postgresql.new_transaction().await?;
