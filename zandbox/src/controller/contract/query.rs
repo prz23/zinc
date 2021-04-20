@@ -40,7 +40,11 @@ pub async fn handle(
         .expect(zinc_const::panic::SYNCHRONIZATION)
         .network;
 
+    log::info!("[{}] 001Querying method `{}`", log_id, method_name);
+
     let contract = Contract::new(network, postgresql.clone(), query.address).await?;
+
+    log::info!("[{}] 002Querying method `{}`", log_id, method_name);
 
     let method_name = match query.method {
         Some(method_name) => {
