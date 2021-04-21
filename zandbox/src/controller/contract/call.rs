@@ -7,12 +7,14 @@ use std::collections::HashMap;
 use actix_web::http::StatusCode;
 use actix_web::web;
 use num::BigInt;
+use num_old::BigUint as oldBigUint;
 
 use crate::contract::Contract;
 use crate::database::model;
 use crate::error::Error;
 use crate::response::Response;
 use crate::storage::Storage;
+use zinc_types::TransactionMsg;
 
 use crate::database::swap_database::SwapDatabase;
 use num::BigUint;
@@ -73,10 +75,11 @@ pub async fn handle(
         .map_err(Error::InvalidInput)?;
     arguments.insert_contract_instance(eth_address_bigint.clone());
 
+    let msg:TransactionMsg = (&body.transaction).try_to_msg(&contract.wallet)?;
     let output = contract
         .run_method(
             query.method.clone(),
-            (&body.transaction).try_to_msg(&contract.wallet)?,
+            msg.clone(),
             arguments.clone(),
             postgresql.clone(),
         )
@@ -100,8 +103,6 @@ pub async fn handle(
             zksync_utils::format_units(&transfer.fee, token.decimals),
             token.symbol,
         );
-//        data = (token.symbol,transfer.amount.to_u64().unwrap()
-//        ,1,transfer.fee.to_u64().unwrap());
     }
     transactions.push(body.transaction);
 
@@ -123,16 +124,24 @@ pub async fn handle(
         )
         .await?;
 
+    //Swap(to,min)  msg(sender,rec,token,amount)
     if query.method == "swap" {
-        let div10_9 = |x:&BigInt| -> u64 {
-            let tmp:BigInt = x / 1000000000;
+        let div10_9 = |x:&oldBigUint| -> u64 {
+            let tmp:oldBigUint = x / 10000000u64;
             tmp.to_u64().unwrap()
         };
         let arguments_flat = arguments.into_flat_values();
-        swapdata.accumlate_amount(&arguments_flat[0].to_string(),
-                                  div10_9(&arguments_flat[1]),
+
+        let to_arg_token = arguments_flat[0].to_string();
+        let from_token = msg.token_address.to_string();
+
+        let pair_name = format!("{}/{}",from_token,to_arg_token);
+        log::info!("pair_name = [{}] ", pair_name);
+
+        swapdata.accumlate_amount(&pair_name,
+                                  div10_9(&msg.amount),
                                   1,
-                                  div10_9(&arguments_flat[2]));
+                                  10);
     }
 
     let mut transaction = postgresql.new_transaction().await?;
