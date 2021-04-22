@@ -107,3 +107,5 @@ pub use self::utils::private_key_from_slice;
 
 pub use self::request::swap::Query as SwapRequestQuery;
 pub use self::response::swap::Body as SwapResponseBody;
+
+pub use self::request::tokenname::Query as TokennameRequestQuery;

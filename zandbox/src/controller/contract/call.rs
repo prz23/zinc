@@ -130,12 +130,17 @@ pub async fn handle(
             let tmp:oldBigUint = x / 10000000u64;
             tmp.to_u64().unwrap()
         };
+
         let arguments_flat = arguments.into_flat_values();
 
         let to_arg_token = arguments_flat[0].to_string();
-        let from_token = msg.token_address.to_string();
+        let from_token_name:String =
+            match swapdata.tokenname_convert(&msg.token_address.to_string()){
+                Some(name) => { name },
+                None => { "UnknownToken".to_string() },
+        };
 
-        let pair_name = format!("{}/{}",from_token,to_arg_token);
+        let pair_name = format!("{}/{}",from_token_name,to_arg_token);
         log::info!("pair_name = [{}] ", pair_name);
 
         swapdata.accumlate_amount(&pair_name,

@@ -10,3 +10,4 @@ pub mod query;
 pub mod source;
 pub mod upload;
 pub mod swap;
+pub mod tokenname;

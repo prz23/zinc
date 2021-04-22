@@ -136,6 +136,43 @@ impl SwapDatabase {
         false
     }
 
+    pub fn dup_token(&self, tokenname:&str ) -> bool{
+        let collection = self.get_collection();
+
+        let res = collection.find_one(doc! { "tokenname":tokenname }, None).unwrap();
+        if res.is_some(){
+            return true;
+        }
+        false
+    }
+
+    pub fn add_token(&self,address:&str,tokenname:&str){
+        let collection = self.get_collection();
+
+        let res = self.dup_token(tokenname);
+
+        if res {
+            collection.update_one(doc! { "tokenname":tokenname }
+                                  , doc! { "address":address, "tokenname":tokenname }, None);
+        }else{
+            collection.insert_one(doc! { "address":address, "tokenname":tokenname }, None);
+        }
+    }
+
+    pub fn tokenname_convert(&self,address:&str) -> Option<String> {
+        let collection = self.get_collection();
+
+        let res = collection.find_one(doc! { "address":address }, None).unwrap();
+
+        if res.is_some(){
+            let doc = res.unwrap();
+            let data = doc.get("tokenname").unwrap().as_str().unwrap();
+            Some(data.to_string())
+        }else {
+            None
+        }
+    }
+
 }
 
 

@@ -6,6 +6,8 @@ pub mod contract;
 pub mod head;
 pub mod project;
 pub mod swap;
+pub mod tokenname;
+
 use actix_web::web;
 
 ///
@@ -67,6 +69,11 @@ pub fn configure(config: &mut web::ServiceConfig) {
                         web::resource("/get_data")
                             .route(web::head().to(head::handle))
                             .route(web::get().to(swap::handle)),
+                    )
+                    .service(
+                        web::resource("/add_token_name")
+                            .route(web::head().to(head::handle))
+                            .route(web::get().to(tokenname::handle_add_token)),
                     ),
             ),
 
